@@ -18,9 +18,9 @@ git dotdir do
   only_if { File.directory?(home) }
 end
 
+puts "copying files over"
 Dir.glob("#{dotdir}/.*") do |curr_path|
-  next if curr_path == '.' or curr_path == '..'
-
+  puts "... copying #{curr_path}"
   file "#{home}/#{Pathname.new(curr_path).basename}" do
     owner username
     group username
