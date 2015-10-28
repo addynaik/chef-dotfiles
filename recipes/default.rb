@@ -18,14 +18,15 @@ git dotdir do
   only_if { File.directory?(home) }
 end
 
-puts "copying files over"
-Dir.glob("#{dotdir}/.*") do |curr_path|
-  puts "... copying #{curr_path}"
-  file "#{home}/#{Pathname.new(curr_path).basename}" do
-    owner username
-    group username
-    mode 0644
-    content IO.read(curr_path)
-    action :create
-  end if File.file?(curr_path)
+
+ruby_block "copy dotfiles" do
+  block do
+    Dir.glob("#{dotdir}/.*") do |curr_path|
+      destination_file = "#{home}/#{Pathname.new(curr_path).basename}"
+      if !::File.exists?(destination_file) and ::File.file?(curr_path)
+        ::FileUtils.copy("#{curr_path}", destination_file)
+        ::FileUtils.chown_R username, username, destination_file
+      end
+    end
+  end
 end
